@@ -253,7 +253,6 @@ defmodule Indexer.Supervisor do
         {TokenTotalSupplyUpdater, [[]]},
 
         # Temporary workers
-        {UncatalogedTokenTransfers.Supervisor, [[]]},
         {UnclesWithoutIndex.Supervisor,
          [[json_rpc_named_arguments: json_rpc_named_arguments, memory_monitor: memory_monitor]]},
         {PendingOpsCleaner, [[], []]},
