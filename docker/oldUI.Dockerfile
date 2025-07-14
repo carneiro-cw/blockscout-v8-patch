@@ -3,7 +3,7 @@ FROM hexpm/elixir:1.17.3-erlang-27.3.4-alpine-3.21.3 AS builder-deps
 WORKDIR /app
 
 RUN apk --no-cache --update add \
-    alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat libstdc++ curl ca-certificates git make
+    alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat libstdc++ curl ca-certificates git make bash
 
 # Cache elixir deps
 COPY mix.exs mix.lock ./
@@ -25,7 +25,7 @@ COPY apps ./apps
 ##############################################################
 FROM builder-deps AS builder-ui
 
-RUN apk --no-cache --update add nodejs npm && \
+RUN apk --no-cache --update add nodejs npm bash && \
     npm install npm@latest
 
 # Add blockscout npm deps
@@ -73,7 +73,7 @@ ARG BLOCKSCOUT_GROUP=blockscout
 ARG BLOCKSCOUT_UID=10001
 ARG BLOCKSCOUT_GID=10001
 
-RUN apk --no-cache --update add jq curl && \
+RUN apk --no-cache --update add jq curl bash && \
     addgroup --system --gid ${BLOCKSCOUT_GID} ${BLOCKSCOUT_GROUP} && \
     adduser --system --uid ${BLOCKSCOUT_UID} --ingroup ${BLOCKSCOUT_GROUP} --disabled-password ${BLOCKSCOUT_USER}
 
