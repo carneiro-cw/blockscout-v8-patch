@@ -56,6 +56,8 @@ ENV BRIDGED_TOKENS_ENABLED=${BRIDGED_TOKENS_ENABLED}
 ARG API_GRAPHQL_MAX_COMPLEXITY
 ENV API_GRAPHQL_MAX_COMPLEXITY=${API_GRAPHQL_MAX_COMPLEXITY}
 
+RUN mix deps.get
+
 # Run backend compilation
 RUN mix compile
 
@@ -104,6 +106,6 @@ COPY --from=builder --chown=${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app/config/c
 COPY --from=builder --chown=${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app/config/config_helper.exs /app/releases/${RELEASE_VERSION}/config_helper.exs
 COPY --from=builder --chown=${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app/config/assets/precompiles-arbitrum.json ./config/assets/precompiles-arbitrum.json
 
-RUN chown -R ${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app
+RUN mkdir dets && mkdir temp && chown -R ${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app
 
 USER ${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP}
