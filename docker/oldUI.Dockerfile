@@ -3,7 +3,7 @@ FROM hexpm/elixir:1.17.3-erlang-27.3.4-alpine-3.21.3 AS builder-deps
 WORKDIR /app
 
 RUN apk --no-cache --update add \
-    alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat libstdc++ curl ca-certificates git make
+    alpine-sdk gmp-dev automake libtool inotify-tools autoconf python3 file gcompat libstdc++ curl ca-certificates git make bash
 
 # Cache elixir deps
 COPY mix.exs mix.lock ./
@@ -25,7 +25,7 @@ COPY apps ./apps
 ##############################################################
 FROM builder-deps AS builder-ui
 
-RUN apk --no-cache --update add nodejs npm && \
+RUN apk --no-cache --update add nodejs npm bash && \
     npm install npm@latest
 
 # Add blockscout npm deps
@@ -56,6 +56,8 @@ ENV BRIDGED_TOKENS_ENABLED=${BRIDGED_TOKENS_ENABLED}
 ARG API_GRAPHQL_MAX_COMPLEXITY
 ENV API_GRAPHQL_MAX_COMPLEXITY=${API_GRAPHQL_MAX_COMPLEXITY}
 
+RUN mix deps.get
+
 # Run backend compilation
 RUN mix compile
 
@@ -73,7 +75,7 @@ ARG BLOCKSCOUT_GROUP=blockscout
 ARG BLOCKSCOUT_UID=10001
 ARG BLOCKSCOUT_GID=10001
 
-RUN apk --no-cache --update add jq curl && \
+RUN apk --no-cache --update add jq curl bash && \
     addgroup --system --gid ${BLOCKSCOUT_GID} ${BLOCKSCOUT_GROUP} && \
     adduser --system --uid ${BLOCKSCOUT_UID} --ingroup ${BLOCKSCOUT_GROUP} --disabled-password ${BLOCKSCOUT_USER}
 
@@ -104,6 +106,6 @@ COPY --from=builder --chown=${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app/config/c
 COPY --from=builder --chown=${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app/config/config_helper.exs /app/releases/${RELEASE_VERSION}/config_helper.exs
 COPY --from=builder --chown=${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app/config/assets/precompiles-arbitrum.json ./config/assets/precompiles-arbitrum.json
 
-RUN chown -R ${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app
+RUN mkdir dets && mkdir temp && chown -R ${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP} /app
 
 USER ${BLOCKSCOUT_USER}:${BLOCKSCOUT_GROUP}
